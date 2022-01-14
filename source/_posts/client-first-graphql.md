@@ -32,7 +32,7 @@ tags:
 
 ### 现阶段的困难
 
-虽然 GraphQL 有很多价值，但是提供 GraphQL API 的工作量却在后端。
+虽然 GraphQL对于前端有很多价值，但是提供 GraphQL API 的工作量却在后端。
 
 如何解决？
 
@@ -200,7 +200,7 @@ graphqlClient.query(
 ### n+1问题
 
 当我们执行一次订单查询的时候，会返回20个order，然后我们需要在调用20次客户查询接口，总计调用了 20+1次。
-我们知道GraphqlQL会沿着链路一次查询，order->customer->xxx,如果链路很长，会导致GraphQL响应变慢。
+我们知道GraphqlQL会沿着链路依次查询，order->customer->xxx,如果链路很长，会导致GraphQL响应变慢。
 
 目前GraphQL通用的解决方案是Facebook提供的Dataloader, 他的核心思想是Batch Query和Cached。
 假设我们有一个接口，可以通过id列表查询所有的客户`/customers?id=123,456,789`
