@@ -10,7 +10,7 @@ tags:
 
 ## kiwi-java
 
-kiwi-java参照[kiwi](https://github.com/alibaba/kiwi)的国际化java代码的一个解决方案。
+kiwi-java参照[kiwi](https://github.com/alibaba/kiwi)的国际化java代码的一个解决方案。本方案使用抽象语法树完美解决了上述问题。
 
 ## 流程图
 

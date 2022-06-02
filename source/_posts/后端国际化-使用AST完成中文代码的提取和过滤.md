@@ -45,6 +45,19 @@ List<StringLiteral> visitChineseText(CompilationUnit result){
 
 如果我们需要过滤`logger.info("异常信息"+e)`，我们需要lookup到MethodInvocation节点，然后查看MethodInvocation的expression是否为SimpleName类型，且getIdentifier() == "logger"
 
+### 需要过滤的中文
+
+kiwi中实现的过滤器支持过滤以下中文：
+
+* 去除注释
+* 过滤log中的中文
+* 系统配置的中文
+* 参与业务逻辑的中文比如 "中文".equsals("中文")
+* 正则匹配的中文字符（只包含标点）
+* 存在于注解中的中文
+* 存在于枚举的中文
+* 注释中添加了kiwi-disable-method
+
 ### 过滤器实现
 
 > 所有的过滤器实现了`Predicate<StringLiteral>`接口，用来判断中文是否过滤
