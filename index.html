@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
@@ -111,15 +111,15 @@
 
 
 <nav class="site-nav">
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
   </ul>
@@ -149,6 +149,184 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zt8989.github.io/2022/06/02/%E5%90%8E%E7%AB%AF%E5%9B%BD%E9%99%85%E5%8C%96-%E4%BD%BF%E7%94%A8AST%E5%AE%8C%E6%88%90%E4%B8%AD%E6%96%87%E4%BB%A3%E7%A0%81%E7%9A%84%E6%8F%90%E5%8F%96%E5%92%8C%E8%BF%87%E6%BB%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="阿牛">
+      <meta itemprop="description" content="阿牛的博客, 记录编程和生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿牛的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/06/02/%E5%90%8E%E7%AB%AF%E5%9B%BD%E9%99%85%E5%8C%96-%E4%BD%BF%E7%94%A8AST%E5%AE%8C%E6%88%90%E4%B8%AD%E6%96%87%E4%BB%A3%E7%A0%81%E7%9A%84%E6%8F%90%E5%8F%96%E5%92%8C%E8%BF%87%E6%BB%A4/" class="post-title-link" itemprop="url">后端国际化(二): 使用AST完成中文代码的提取和过滤</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-02 12:43:33 / 修改时间：13:05:22" itemprop="dateCreated datePublished" datetime="2022-06-02T12:43:33+08:00">2022-06-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="提取中文"><a href="#提取中文" class="headerlink" title="提取中文"></a>提取中文</h2><p>本工具使用org.eclipse.jdt.core将java代码转换成AST</p>
+<ol>
+<li><p>将java代码转换成AST树</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> parser = <span class="keyword">new</span> Parser()</span><br><span class="line">CompilationUnit result = parser.ast(content)</span><br><span class="line">Document document = <span class="keyword">new</span> Document(src.text)</span><br><span class="line"><span class="keyword">def</span> ast = result.getAST()</span><br></pre></td></tr></table></figure></li>
+<li><p>使用Vistior模式遍历所有字符串</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">List&lt;StringLiteral&gt; visitChineseText(CompilationUnit result)&#123;</span><br><span class="line">    var translateList = []</span><br><span class="line">    result.accept(<span class="keyword">new</span> ASTVisitor()&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">boolean</span> visit(StringLiteral node) &#123;</span><br><span class="line">            <span class="keyword">if</span>(node.toString() =~ Config.DOUBLE_BYTE_REGEX)&#123;</span><br><span class="line">                translateList.add(node)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">super</span>.visit(node)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> translateList</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="过滤"><a href="#过滤" class="headerlink" title="过滤"></a>过滤</h2><h3 id="原理：熟悉AST"><a href="#原理：熟悉AST" class="headerlink" title="原理：熟悉AST"></a>原理：熟悉AST</h3><blockquote>
+<p>以下是<code>logger.info(&quot;异常信息&quot;+e)</code>的AST</p>
+</blockquote>
+<p><img src="/images/A4C441DD-29F6-478F-A0BB-361572EA6D9B.png" alt="logger.info(&quot;异常信息&quot;+e)"></p>
+<p>如果我们需要过滤<code>logger.info(&quot;异常信息&quot;+e)</code>，我们需要lookup到MethodInvocation节点，然后查看MethodInvocation的expression是否为SimpleName类型，且getIdentifier() == “logger”</p>
+<h3 id="过滤器实现"><a href="#过滤器实现" class="headerlink" title="过滤器实现"></a>过滤器实现</h3><blockquote>
+<p>所有的过滤器实现了<code>Predicate&lt;StringLiteral&gt;</code>接口，用来判断中文是否过滤</p>
+</blockquote>
+<p>常用的过滤器有：</p>
+<ol>
+<li>注解过滤器</li>
+</ol>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> isInAnnotation(StringLiteral stringLiteral)&#123;</span><br><span class="line">    <span class="keyword">def</span> parent = stringLiteral.parent</span><br><span class="line">    <span class="comment">// 以StringLiteral节点向上查找，如果找到了注解，则返回true</span></span><br><span class="line">    <span class="keyword">while</span> (parent != <span class="literal">null</span> &amp;&amp; !(parent <span class="keyword">instanceof</span> TypeDeclaration)) &#123;</span><br><span class="line">        <span class="keyword">if</span>(parent <span class="keyword">instanceof</span> Annotation)&#123;</span><br><span class="line">            <span class="keyword">def</span> memberValuePair = AstUtils.lookupUntilASTNode(stringLiteral, MemberValuePair.<span class="keyword">class</span>)</span><br><span class="line">            <span class="keyword">if</span>(memberValuePair.isPresent())&#123;</span><br><span class="line">                <span class="keyword">return</span> !shouldExclude(memberValuePair.get(), parent)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        parent = parent.parent</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>常量过滤器</li>
+<li>枚举过滤器</li>
+</ol>
+<blockquote>
+<p>通常Enum里的中文无需翻译，也无法替换，因为不能在初始化的时候调用方法</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">RpFlagEnum</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 应付</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    P(<span class="string">&quot;P&quot;</span>,<span class="string">&quot;应付&quot;</span>),</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 应收</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    R(<span class="string">&quot;R&quot;</span>,<span class="string">&quot;应收&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> optMethod = AstUtils.lookupUntilASTNode(stringLiteral, EnumConstantDeclaration.<span class="keyword">class</span>)</span><br><span class="line"><span class="keyword">if</span> (optMethod.isPresent()) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>日志过滤</li>
+</ol>
+<blockquote>
+<p>过滤 log.info(“中文”)</p>
+</blockquote>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> optMethod = AstUtils.lookupUntilASTNode(stringLiteral, MethodInvocation.<span class="keyword">class</span>)</span><br><span class="line"><span class="keyword">if</span>(optMethod.isPresent())&#123;</span><br><span class="line">    <span class="keyword">def</span> methodName = optMethod.get().getExpression()</span><br><span class="line">    <span class="comment">// log.info(xxx)</span></span><br><span class="line">    <span class="keyword">if</span>(methodName <span class="keyword">instanceof</span> SimpleName)&#123;</span><br><span class="line">        <span class="keyword">def</span> simpleName = (SimpleName)methodName</span><br><span class="line">        <span class="keyword">if</span>(isLogInfo(simpleName.getIdentifier()))&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// this.log.info(xxx)</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(methodName <span class="keyword">instanceof</span>  FieldAccess)&#123;</span><br><span class="line">        <span class="keyword">def</span> fieldAccess = (FieldAccess)methodName</span><br><span class="line">        <span class="keyword">def</span> fieldName = fieldAccess.getName()</span><br><span class="line">        <span class="keyword">if</span>(isLogInfo(fieldName.getIdentifier()))&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>Main方法过滤</li>
+<li>I18n方法过滤</li>
+<li>注释中添加了kiwi-disable-method</li>
+</ol>
+<blockquote>
+<p>某些情况下我们需要过滤的中文属于业务逻辑，但是代码无法判断，需要添加注释跳过</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* kiwi-disable-method</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function">pubic String <span class="title">abc</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">&quot;中文&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> hasMethodComment(StringLiteral stringLiteral) &#123;</span><br><span class="line">    <span class="keyword">def</span> parent = stringLiteral.parent</span><br><span class="line">    <span class="keyword">while</span> (parent != <span class="literal">null</span> &amp;&amp; !(parent <span class="keyword">instanceof</span> TypeDeclaration)) &#123;</span><br><span class="line">        <span class="keyword">if</span>(parent <span class="keyword">instanceof</span> MethodDeclaration)&#123;</span><br><span class="line">            <span class="keyword">def</span> doc = parent.getJavadoc()</span><br><span class="line">            <span class="keyword">return</span> doc.toString().contains(methodComment)</span><br><span class="line">        &#125;</span><br><span class="line">        parent = parent.parent</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="8">
+<li>正则过滤器(正则匹配的中文字符（只包含标点）)</li>
+<li>参与业务逻辑的中文比如 “中文”.equsals(“中文”)</li>
+</ol>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> hasStringEquals(StringLiteral stringLiteral)&#123;</span><br><span class="line">     <span class="keyword">def</span> optMethod = AstUtils.lookupUntilASTNode(stringLiteral, MethodInvocation.<span class="keyword">class</span>)</span><br><span class="line">     <span class="keyword">if</span>(optMethod.isPresent())&#123;</span><br><span class="line">         <span class="keyword">def</span> method = optMethod.get()</span><br><span class="line">         <span class="keyword">if</span>(method.name.identifier == <span class="string">&quot;equals&quot;</span>)&#123;</span><br><span class="line">             <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zt8989.github.io/2022/06/02/%E5%90%8E%E7%AB%AF%E5%9B%BD%E9%99%85%E5%8C%96-kiwi-java%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="阿牛">
+      <meta itemprop="description" content="阿牛的博客, 记录编程和生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="阿牛的博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/06/02/%E5%90%8E%E7%AB%AF%E5%9B%BD%E9%99%85%E5%8C%96-kiwi-java%E7%AE%80%E4%BB%8B/" class="post-title-link" itemprop="url">后端国际化(一): kiwi-java简介</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-02 12:43:17 / 修改时间：13:05:22" itemprop="dateCreated datePublished" datetime="2022-06-02T12:43:17+08:00">2022-06-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="国际化的困难在哪里？"><a href="#国际化的困难在哪里？" class="headerlink" title="国际化的困难在哪里？"></a>国际化的困难在哪里？</h2><p>通常项目中的异常消息等一系列文案都是中文，开发人员在开发的时候并没有考虑到国际化的情况，我们需要判断出哪些中文是注释，哪些中文是文案，哪些文案参与了业务逻辑。</p>
+<h2 id="kiwi-java"><a href="#kiwi-java" class="headerlink" title="kiwi-java"></a>kiwi-java</h2><p>kiwi-java参照<a target="_blank" rel="noopener" href="https://github.com/alibaba/kiwi">kiwi</a>的国际化java代码的一个解决方案。</p>
+<h2 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h2><p><img src="/images/A88572FA-F9B0-4688-AE7A-D35C8A3A5EC0.png"></p>
+<h2 id="架构设计"><a href="#架构设计" class="headerlink" title="架构设计"></a>架构设计</h2><blockquote>
+<p>kiwi-java主要包含四个核心模块：提取、过滤器、转换、翻译。</p>
+</blockquote>
+<p><img src="/images/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://zt8989.github.io/2022/01/13/client-first-graphql/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -169,7 +347,7 @@
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -177,10 +355,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-06-02 12:42:32" itemprop="dateModified" datetime="2022-06-02T12:42:32+08:00">2022-06-02</time>
+                <time title="修改时间：2022-06-02 13:05:22" itemprop="dateModified" datetime="2022-06-02T13:05:22+08:00">2022-06-02</time>
               </span>
 
           
@@ -290,7 +468,7 @@
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -298,10 +476,10 @@
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
+                  <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-06-02 12:42:32" itemprop="dateModified" datetime="2022-06-02T12:42:32+08:00">2022-06-02</time>
+                <time title="修改时间：2022-06-02 13:05:22" itemprop="dateModified" datetime="2022-06-02T13:05:22+08:00">2022-06-02</time>
               </span>
 
           
@@ -407,7 +585,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -441,7 +619,7 @@
   &copy; 
   <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">阿牛</span>
 </div>
@@ -449,26 +627,6 @@
   </div>
 
         
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
 
 
 
@@ -518,7 +676,6 @@
   
 
   
-
 
 </body>
 </html>
